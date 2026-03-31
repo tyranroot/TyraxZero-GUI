@@ -41,6 +41,7 @@ bash start.sh
 ## 📦 Python Requirements
 
 ```bash
+pip install flask
 pip install -r requirements.txt
 ```
 
