@@ -22,7 +22,9 @@ pkg update -y
 pkg upgrade -y
 pkg install python git -y
 git clone https://github.com/tyranroot/TyraxZero-GUI.git
-cd TyraxZero-GUI 
+cd TyraxZero-GUI
+unzip TyraxZero-GUI.zip
+cd Live-Gui-3
 bash start.sh
 python3 app.py
 ````
