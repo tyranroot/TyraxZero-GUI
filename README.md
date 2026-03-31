@@ -19,7 +19,6 @@ A Python-based Cyber Security Penetration Testing Toolkit With GUI..
 
 ```bash
 pkg update -y
-pkg upgrade -y
 pkg install python git -y
 git clone https://github.com/tyranroot/TyraxZero-GUI.git
 cd TyraxZero-GUI
