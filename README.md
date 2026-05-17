@@ -22,8 +22,6 @@ pkg update -y
 pkg install python git -y
 git clone https://github.com/tyranroot/TyraxZero-GUI.git
 cd TyraxZero-GUI
-unzip TyraxZero-GUI.zip
-cd Live-Gui-3
 bash start.sh
 python3 app.py
 ````
@@ -33,7 +31,7 @@ python3 app.py
 ## 🚀 Run the Tool
 
 ```bash
-bash start.sh
+python3 app.py
 ```
 
 
@@ -41,7 +39,6 @@ bash start.sh
 
 ```bash
 pip install flask
-pip install -r requirements.txt
 ```
 
 ---
