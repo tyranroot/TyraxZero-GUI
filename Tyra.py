@@ -1,1 +1,0 @@
-print ("maruf x zerotrace")
