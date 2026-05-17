@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TyraxZero | Cyber Sequrity | Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030a0f;
+  --bg2:#071219;
+  --bg3:#0a1a24;
+  --panel:#0d1f2d;
+  --panel2:#112435;
+  --accent:#00ff88;
+  --accent2:#00d4ff;
+  --accent3:#ff3e6c;
+  --accent4:#ffaa00;
+  --text:#c8e8f0;
+  --text2:#6a9ab0;
+  --border:#1a3a4f;
+  --glow:0 0 12px rgba(0,255,136,.35);
+  --glow2:0 0 12px rgba(0,212,255,.35);
+  --font-mono:'Share Tech Mono',monospace;
+  --font-head:'Orbitron',sans-serif;
+  --font-ui:'Rajdhani',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-ui);overflow:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
+/* ── SCANLINE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.15) 2px,rgba(0,0,0,.15) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ── LAYOUT ── */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:260px;min-width:260px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .3s,min-width .3s}
+#sidebar.collapsed{width:0;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+#topbar{
+  height:52px;background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;
+}
+#topbar .logo{font-family:var(--font-head);font-size:1.15rem;font-weight:900;color:var(--accent);letter-spacing:.15em;text-shadow:var(--glow)}
+#topbar .logo span{color:var(--accent2)}
+#sidebar-toggle{background:none;border:1px solid var(--border);color:var(--accent2);padding:4px 10px;cursor:pointer;font-family:var(--font-mono);font-size:.8rem;border-radius:3px;transition:.2s}
+#sidebar-toggle:hover{background:var(--border)}
+#status-bar{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:.72rem;font-family:var(--font-mono);color:var(--text2)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#clock{color:var(--accent4);font-size:.75rem}
+#server-info{color:var(--accent2)}
+
+/* ── SIDEBAR ── */
+#sidebar-inner{flex:1;overflow-y:auto;padding:8px 0}
+.sidebar-logo{
+  padding:16px 16px 8px;font-family:var(--font-head);font-size:.7rem;
+  color:var(--accent);letter-spacing:.2em;border-bottom:1px solid var(--border);margin-bottom:8px;
+}
+.cat-header{
+  padding:6px 16px 4px;font-size:.62rem;font-family:var(--font-mono);
+  color:var(--accent4);letter-spacing:.15em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.cat-header::after{content:'';flex:1;height:1px;background:var(--border)}
+.tool-btn{
+  display:flex;align-items:center;gap:10px;width:100%;padding:7px 16px;
+  background:none;border:none;color:var(--text2);cursor:pointer;
+  font-family:var(--font-ui);font-size:.85rem;font-weight:600;text-align:left;
+  transition:all .15s;border-left:3px solid transparent;
+}
+.tool-btn:hover{background:var(--panel);color:var(--accent);border-left-color:var(--accent)}
+.tool-btn.active{background:var(--panel2);color:var(--accent);border-left-color:var(--accent);box-shadow:inset 0 0 20px rgba(0,255,136,.05)}
+.tool-btn .t-icon{font-size:.95rem;width:18px;text-align:center}
+.tool-btn .t-badge{margin-left:auto;font-size:.6rem;background:var(--accent3);color:#fff;padding:1px 5px;border-radius:3px}
+
+/* ── CONTENT ── */
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── TOOL PANEL ── */
+#tool-panel{
+  flex:1;padding:16px;overflow:hidden;display:flex;flex-direction:column;gap:12px;
+}
+.tool-header{
+  display:flex;align-items:center;gap:12px;padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.tool-header h2{font-family:var(--font-head);font-size:1rem;color:var(--accent);letter-spacing:.1em;text-shadow:var(--glow)}
+.tool-header .tool-desc{font-size:.8rem;color:var(--text2);font-family:var(--font-mono)}
+.tool-category-badge{
+  font-size:.6rem;padding:2px 8px;border-radius:2px;font-family:var(--font-mono);
+  letter-spacing:.1em;text-transform:uppercase;margin-left:auto;
+}
+.badge-network{background:rgba(0,212,255,.15);color:var(--accent2);border:1px solid rgba(0,212,255,.3)}
+.badge-web{background:rgba(255,170,0,.12);color:var(--accent4);border:1px solid rgba(255,170,0,.3)}
+.badge-crypto{background:rgba(0,255,136,.12);color:var(--accent);border:1px solid rgba(0,255,136,.3)}
+.badge-system{background:rgba(255,62,108,.12);color:var(--accent3);border:1px solid rgba(255,62,108,.3)}
+.badge-recon{background:rgba(160,100,255,.15);color:#b87fff;border:1px solid rgba(160,100,255,.3)}
+
+.input-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.input-group{display:flex;flex-direction:column;gap:4px}
+.input-group label{font-size:.72rem;color:var(--text2);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.1em}
+.input-group input,.input-group select,.input-group textarea{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  padding:7px 10px;font-family:var(--font-mono);font-size:.82rem;
+  border-radius:3px;outline:none;transition:.2s;width:100%;
+}
+.input-group input:focus,.input-group select:focus,.input-group textarea:focus{
+  border-color:var(--accent2);box-shadow:0 0 8px rgba(0,212,255,.2);
+}
+.input-group textarea{resize:vertical;min-height:60px}
+.btn-run{
+  padding:8px 24px;background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,212,255,.1));
+  border:1px solid var(--accent);color:var(--accent);font-family:var(--font-head);
+  font-size:.75rem;letter-spacing:.15em;cursor:pointer;border-radius:3px;
+  transition:.2s;text-transform:uppercase;align-self:flex-end;
+}
+.btn-run:hover{background:linear-gradient(135deg,rgba(0,255,136,.3),rgba(0,212,255,.2));box-shadow:var(--glow)}
+.btn-run:active{transform:scale(.97)}
+.btn-run.loading{opacity:.6;cursor:wait}
+.btn-clear{
+  padding:8px 14px;background:rgba(255,62,108,.08);border:1px solid rgba(255,62,108,.3);
+  color:var(--accent3);font-family:var(--font-mono);font-size:.75rem;cursor:pointer;
+  border-radius:3px;transition:.2s;
+}
+.btn-clear:hover{background:rgba(255,62,108,.2)}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── TERMINAL OUTPUT ── */
+#output-container{
+  flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:4px;
+  overflow:hidden;display:flex;flex-direction:column;min-height:0;
+}
+.output-header{
+  display:flex;align-items:center;padding:6px 12px;background:var(--panel);
+  border-bottom:1px solid var(--border);gap:8px;
+}
+.output-dots span{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+.output-dots .d1{background:#ff3e6c}
+.output-dots .d2{background:#ffaa00}
+.output-dots .d3{background:#00ff88}
+.output-title{font-family:var(--font-mono);font-size:.72rem;color:var(--text2);margin-left:4px}
+.copy-btn{margin-left:auto;font-size:.65rem;background:none;border:1px solid var(--border);
+  color:var(--text2);padding:2px 8px;cursor:pointer;border-radius:2px;font-family:var(--font-mono)}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+#output{
+  flex:1;overflow-y:auto;padding:12px 14px;font-family:var(--font-mono);
+  font-size:.78rem;line-height:1.7;color:#a8e6c0;white-space:pre-wrap;word-break:break-all;
+}
+#output .ok{color:var(--accent)}
+#output .err{color:var(--accent3)}
+#output .info{color:var(--accent2)}
+#output .warn{color:var(--accent4)}
+.typing-cursor::after{content:'▋';animation:blink 1s step-end infinite}
+
+/* ── WELCOME SCREEN ── */
+#welcome{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:16px;
+}
+.ascii-logo{
+  font-family:var(--font-mono);font-size:.55rem;line-height:1.3;color:var(--accent);
+  text-shadow:var(--glow);text-align:center;
+}
+.welcome-subtitle{font-family:var(--font-head);color:var(--accent2);font-size:.9rem;letter-spacing:.2em}
+.welcome-stats{display:flex;gap:24px;margin-top:8px}
+.stat-box{
+  text-align:center;padding:10px 20px;border:1px solid var(--border);
+  background:var(--panel);border-radius:4px;
+}
+.stat-box .sn{font-family:var(--font-head);font-size:1.6rem;color:var(--accent);text-shadow:var(--glow)}
+.stat-box .sl{font-size:.7rem;color:var(--text2);font-family:var(--font-mono);letter-spacing:.1em}
+.welcome-hint{color:var(--text2);font-size:.8rem;font-family:var(--font-mono)}
+
+/* ── BOTTOM STATUS BAR ── */
+#footer{
+  height:26px;background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;gap:20px;
+  font-family:var(--font-mono);font-size:.65rem;color:var(--text2);flex-shrink:0;
+}
+#footer span{display:flex;align-items:center;gap:5px}
+#footer .accent{color:var(--accent)}
+#footer .accent2{color:var(--accent2)}
+#footer .accent3{color:var(--accent3)}
+
+/* ── LOADING SPINNER ── */
+.spinner{
+  display:inline-block;width:12px;height:12px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── GRID CORNERS ── */
+.panel-corner{position:relative;border:1px solid var(--border);border-radius:4px;padding:16px}
+.panel-corner::before,.panel-corner::after{
+  content:'';position:absolute;width:12px;height:12px;
+}
+.panel-corner::before{top:-1px;left:-1px;border-top:2px solid var(--accent);border-left:2px solid var(--accent)}
+.panel-corner::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--accent2);border-right:2px solid var(--accent2)}
+
+/* ── HEX GRID BG ── */
+#welcome::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(0,255,136,.04) 1px,transparent 1px);
+  background-size:30px 30px;pointer-events:none;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);transition:.3s}
+  #sidebar.mobile-open{transform:translateX(0)}
+  #sidebar.collapsed{width:260px;min-width:260px;transform:translateX(-100%)}
+  .tool-header{flex-wrap:wrap}
+  .input-grid{grid-template-columns:1fr}
+  .welcome-stats{flex-wrap:wrap;gap:12px}
+  .ascii-logo{font-size:.4rem}
+  #topbar .logo{font-size:.95rem}
+  #status-bar .srv{display:none}
+}
+@media(max-width:480px){
+  #tool-panel{padding:10px}
+  .welcome-stats{flex-direction:column;align-items:center}
+}
+
+/* ── MATRIX RAIN CANVAS ── */
+#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.04;pointer-events:none}
+#app{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+
+<div id="app">
+  <!-- ───── SIDEBAR ───── -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">◈ TyraxZero</div>
+    <div id="sidebar-inner">
+
+      <div class="cat-header">⬡ Network</div>
+      <button class="tool-btn" onclick="loadTool('port_scanner')"><span class="t-icon">⬡</span>Port Scanner</button>
+      <button class="tool-btn" onclick="loadTool('ping_host')"><span class="t-icon">◉</span>Ping Host</button>
+      <button class="tool-btn" onclick="loadTool('traceroute')"><span class="t-icon">↝</span>Traceroute</button>
+      <button class="tool-btn" onclick="loadTool('dns_lookup')"><span class="t-icon">◈</span>DNS Lookup</button>
+      <button class="tool-btn" onclick="loadTool('reverse_dns')"><span class="t-icon">↩</span>Reverse DNS</button>
+      <button class="tool-btn" onclick="loadTool('whois_lookup')"><span class="t-icon">◎</span>WHOIS Lookup</button>
+      <button class="tool-btn" onclick="loadTool('arp_scan')"><span class="t-icon">⊕</span>ARP Scan</button>
+      <button class="tool-btn" onclick="loadTool('banner_grabber')"><span class="t-icon">⊞</span>Banner Grabber</button>
+      <button class="tool-btn" onclick="loadTool('network_range_scan')"><span class="t-icon">⊟</span>Network Range Scan</button>
+      <button class="tool-btn" onclick="loadTool('open_port_finder')"><span class="t-icon">⊡</span>Open Port Finder</button>
+      <button class="tool-btn" onclick="loadTool('tcp_connect_test')"><span class="t-icon">⊢</span>TCP Connect Test</button>
+      <button class="tool-btn" onclick="loadTool('udp_scan')"><span class="t-icon">⊣</span>UDP Scan</button>
+      <button class="tool-btn" onclick="loadTool('mac_lookup')"><span class="t-icon">⊤</span>MAC Lookup</button>
+      <button class="tool-btn" onclick="loadTool('ip_geolocation')"><span class="t-icon">⊥</span>IP Geolocation</button>
+      <button class="tool-btn" onclick="loadTool('subnet_calculator')"><span class="t-icon">⊦</span>Subnet Calculator</button>
+
+      <div class="cat-header">⬡ Web</div>
+      <button class="tool-btn" onclick="loadTool('http_headers')"><span class="t-icon">⋮</span>HTTP Headers</button>
+      <button class="tool-btn" onclick="loadTool('robots_txt')"><span class="t-icon">⋯</span>Robots.txt</button>
+      <button class="tool-btn" onclick="loadTool('sitemap_finder')"><span class="t-icon">⋰</span>Sitemap Finder</button>
+      <button class="tool-btn" onclick="loadTool('dir_bruteforce')"><span class="t-icon">⋱</span>Dir Brute-Force<span class="t-badge">HOT</span></button>
+      <button class="tool-btn" onclick="loadTool('sql_injection_test')"><span class="t-icon">⊓</span>SQLi Tester<span class="t-badge">HOT</span></button>
+      <button class="tool-btn" onclick="loadTool('xss_scanner')"><span class="t-icon">⊔</span>XSS Scanner</button>
+      <button class="tool-btn" onclick="loadTool('ssl_checker')"><span class="t-icon">⊏</span>SSL Checker</button>
+      <button class="tool-btn" onclick="loadTool('url_encoder')"><span class="t-icon">⊐</span>URL Encoder</button>
+      <button class="tool-btn" onclick="loadTool('url_decoder')"><span class="t-icon">⊑</span>URL Decoder</button>
+      <button class="tool-btn" onclick="loadTool('http_method_test')"><span class="t-icon">⊒</span>HTTP Methods</button>
+      <button class="tool-btn" onclick="loadTool('cookie_analyzer')"><span class="t-icon">⊕</span>Cookie Analyzer</button>
+      <button class="tool-btn" onclick="loadTool('web_crawler')"><span class="t-icon">⊘</span>Web Crawler</button>
+      <button class="tool-btn" onclick="loadTool('cms_detector')"><span class="t-icon">⊙</span>CMS Detector</button>
+      <button class="tool-btn" onclick="loadTool('email_harvester')"><span class="t-icon">⊚</span>Email Harvester</button>
+      <button class="tool-btn" onclick="loadTool('wayback_lookup')"><span class="t-icon">⊛</span>Wayback Lookup</button>
+
+      <div class="cat-header">⬡ Crypto</div>
+      <button class="tool-btn" onclick="loadTool('md5_hash')"><span class="t-icon">≋</span>MD5 Hash</button>
+      <button class="tool-btn" onclick="loadTool('sha1_hash')"><span class="t-icon">≌</span>SHA-1 Hash</button>
+      <button class="tool-btn" onclick="loadTool('sha256_hash')"><span class="t-icon">≍</span>SHA-256 Hash</button>
+      <button class="tool-btn" onclick="loadTool('sha512_hash')"><span class="t-icon">≎</span>SHA-512 Hash</button>
+      <button class="tool-btn" onclick="loadTool('base64_encode')"><span class="t-icon">≏</span>Base64 Encode</button>
+      <button class="tool-btn" onclick="loadTool('base64_decode')"><span class="t-icon">≐</span>Base64 Decode</button>
+      <button class="tool-btn" onclick="loadTool('caesar_cipher')"><span class="t-icon">≑</span>Caesar Cipher</button>
+      <button class="tool-btn" onclick="loadTool('rot13')"><span class="t-icon">≒</span>ROT-13</button>
+      <button class="tool-btn" onclick="loadTool('hex_encode')"><span class="t-icon">≓</span>Hex Encode</button>
+      <button class="tool-btn" onclick="loadTool('hex_decode')"><span class="t-icon">≔</span>Hex Decode</button>
+      <button class="tool-btn" onclick="loadTool('jwt_decoder')"><span class="t-icon">≕</span>JWT Decoder</button>
+      <button class="tool-btn" onclick="loadTool('password_strength')"><span class="t-icon">≖</span>Password Strength</button>
+      <button class="tool-btn" onclick="loadTool('password_generator')"><span class="t-icon">≗</span>Password Generator</button>
+      <button class="tool-btn" onclick="loadTool('hash_cracker')"><span class="t-icon">≙</span>Hash Cracker</button>
+      <button class="tool-btn" onclick="loadTool('xor_cipher')"><span class="t-icon">≚</span>XOR Cipher</button>
+
+      <div class="cat-header">⬡ System</div>
+      <button class="tool-btn" onclick="loadTool('system_info')"><span class="t-icon">⊞</span>System Info</button>
+      <button class="tool-btn" onclick="loadTool('process_list')"><span class="t-icon">⊟</span>Process List</button>
+      <button class="tool-btn" onclick="loadTool('disk_usage')"><span class="t-icon">⊠</span>Disk Usage</button>
+      <button class="tool-btn" onclick="loadTool('network_interfaces')"><span class="t-icon">⊡</span>Net Interfaces</button>
+      <button class="tool-btn" onclick="loadTool('env_variables')"><span class="t-icon">⊢</span>Env Variables</button>
+      <button class="tool-btn" onclick="loadTool('file_hash_check')"><span class="t-icon">⊣</span>File Hash Check</button>
+      <button class="tool-btn" onclick="loadTool('log_analyzer')"><span class="t-icon">⊤</span>Log Analyzer</button>
+      <button class="tool-btn" onclick="loadTool('firewall_rules')"><span class="t-icon">⊥</span>Firewall Rules</button>
+
+      <div class="cat-header">⬡ Recon</div>
+      <button class="tool-btn" onclick="loadTool('google_dork')"><span class="t-icon">◈</span>Google Dorker</button>
+      <button class="tool-btn" onclick="loadTool('social_recon')"><span class="t-icon">◉</span>Social Recon</button>
+      <button class="tool-btn" onclick="loadTool('tech_fingerprint')"><span class="t-icon">◊</span>Tech Fingerprint</button>
+      <button class="tool-btn" onclick="loadTool('domain_age')"><span class="t-icon">○</span>Domain Age</button>
+      <button class="tool-btn" onclick="loadTool('asn_lookup')"><span class="t-icon">◌</span>ASN Lookup</button>
+    </div>
+  </nav>
+
+  <!-- ───── MAIN AREA ───── -->
+  <div id="main">
+    <!-- Topbar -->
+    <div id="topbar">
+      <button id="sidebar-toggle" onclick="toggleSidebar()">☰ MENU</button>
+      <div class="logo">CYBER<span>KIT</span></div>
+      <div id="status-bar">
+        <div class="status-dot"></div>
+        <span class="srv">ONLINE</span>
+        <span id="server-info" class="srv">127.0.0.1:5000</span>
+        <span id="clock">--:--:--</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="content">
+      <div id="tool-panel">
+
+        <!-- WELCOME -->
+        <div id="welcome" style="position:relative">
+          <div class="ascii-logo">
+············································································
+: _____                      _____            _____           _ _    _ _   :
+:|_   _|   _ _ __ __ ___  __|__  /___ _ __ __|_   _|__   ___ | | | _(_) |_ :
+:  | || | | | '__/ _` \ \/ /  / // _ \ '__/ _ \| |/ _ \ / _ \| | |/ / | __|:
+:  | || |_| | | | (_| |>  <  / /|  __/ | | (_) | | (_) | (_) | |   <| | |_ :
+:  |_| \__, |_|  \__,_/_/\_\/____\___|_|  \___/|_|\___/ \___/|_|_|\_\_|\__|:
+:      |___/                                                               :
+············································································
+          </div>
+          <div class="welcome-subtitle">TyraxZero Cyber Kit</div>
+          <div class="welcome-stats">
+            <div class="stat-box"><div class="sn">53</div><div class="sl">TOTAL TOOLS</div></div>
+            <div class="stat-box"><div class="sn">5</div><div class="sl">CATEGORIES</div></div>
+            <div class="stat-box"><div class="sn">2</div><div class="sl">SERVERS</div></div>
+            <div class="stat-box"><div class="sn">∞</div><div class="sl">POTENTIAL</div></div>
+          </div>
+          <div class="welcome-hint">← Select a tool from the sidebar to begin</div>
+        </div>
+
+        <!-- TOOL FORM (hidden initially) -->
+        <div id="tool-form" style="display:none;flex-direction:column;gap:10px;height:100%">
+          <div class="tool-header">
+            <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+              <h2 id="tool-title">Tool Name</h2>
+              <div class="tool-desc" id="tool-desc">Tool description</div>
+            </div>
+            <span class="tool-category-badge" id="tool-badge">NETWORK</span>
+          </div>
+
+          <div id="tool-inputs" class="input-grid"></div>
+
+          <div class="btn-row">
+            <button class="btn-run" id="run-btn" onclick="runTool()">▶ EXECUTE</button>
+            <button class="btn-clear" onclick="clearOutput()">✕ CLEAR</button>
+            <span id="run-status" style="font-family:var(--font-mono);font-size:.72rem;color:var(--text2)"></span>
+          </div>
+
+          <div id="output-container">
+            <div class="output-header">
+              <div class="output-dots">
+                <span class="d1"></span><span class="d2"></span><span class="d3"></span>
+              </div>
+              <div class="output-title" id="output-title">terminal@cyberkit ~ $</div>
+              <button class="copy-btn" onclick="copyOutput()">⊞ COPY</button>
+            </div>
+            <div id="output">
+<span style="color:var(--accent2)">CyberKit Terminal Ready.</span>
+<span style="color:var(--text2)">Configure parameters above and click EXECUTE.</span>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer">
+      <span>◈ TyraxZero</span>
+      <span><span class="accent">LOCAL</span> 127.0.0.1:5000</span>
+      <span><span class="accent2">PUBLIC</span> <span id="public-ip-footer">loading...</span>:8080</span>
+      <span style="margin-left:auto"><span class="accent3" id="tool-count-footer">53 tools</span> ready</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  TOOL DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const TOOLS = {
+  port_scanner:       {title:'Port Scanner',       desc:'Scan open TCP ports on a target host', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Target Host/IP',ph:'192.168.1.1 or example.com'},{id:'ports',label:'Port Range',ph:'1-1024'},{id:'timeout',label:'Timeout (sec)',ph:'0.5'}]},
+  ping_host:          {title:'Ping Host',          desc:'Send ICMP ping packets to a host', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Host/IP',ph:'8.8.8.8'},{id:'count',label:'Count',ph:'4'}]},
+  traceroute:         {title:'Traceroute',         desc:'Trace network hops to a destination', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Host/IP',ph:'google.com'}]},
+  dns_lookup:         {title:'DNS Lookup',         desc:'Resolve domain names to IP addresses', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'domain',label:'Domain',ph:'example.com'}]},
+  reverse_dns:        {title:'Reverse DNS',        desc:'Resolve IP address to hostname', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'ip',label:'IP Address',ph:'8.8.8.8'}]},
+  whois_lookup:       {title:'WHOIS Lookup',       desc:'Get domain registration information', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'domain',label:'Domain',ph:'example.com'}]},
+  arp_scan:           {title:'ARP Scan',           desc:'View local network ARP cache', cat:'NETWORK', badge:'badge-network',
+    inputs:[]},
+  banner_grabber:     {title:'Banner Grabber',     desc:'Grab service banners from open ports', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Host',ph:'example.com'},{id:'port',label:'Port',ph:'80'}]},
+  network_range_scan: {title:'Network Range Scan', desc:'Scan all hosts in a CIDR range', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'cidr',label:'CIDR Range',ph:'192.168.1.0/24'}]},
+  open_port_finder:   {title:'Open Port Finder',  desc:'Check common ports on a target', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Host/IP',ph:'example.com'}]},
+  tcp_connect_test:   {title:'TCP Connect Test',  desc:'Test TCP connectivity to host:port', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Host',ph:'example.com'},{id:'port',label:'Port',ph:'80'}]},
+  udp_scan:           {title:'UDP Scan',           desc:'Send UDP probe to a port', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'host',label:'Host',ph:'8.8.8.8'},{id:'port',label:'Port',ph:'53'}]},
+  mac_lookup:         {title:'MAC Lookup',         desc:'Find vendor from MAC address', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'mac',label:'MAC Address',ph:'00:1A:2B:3C:4D:5E'}]},
+  ip_geolocation:     {title:'IP Geolocation',    desc:'Get geographic location of an IP', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'ip',label:'IP Address',ph:'8.8.8.8'}]},
+  subnet_calculator:  {title:'Subnet Calculator', desc:'Calculate subnet details from CIDR', cat:'NETWORK', badge:'badge-network',
+    inputs:[{id:'cidr',label:'CIDR Notation',ph:'192.168.1.0/24'}]},
+
+  http_headers:       {title:'HTTP Headers',      desc:'Fetch and analyze HTTP response headers', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  robots_txt:         {title:'Robots.txt',        desc:'Fetch and display robots.txt file', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  sitemap_finder:     {title:'Sitemap Finder',    desc:'Discover sitemap files on a website', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  dir_bruteforce:     {title:'Dir Brute-Force',   desc:'Brute-force common directories/files', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'Base URL',ph:'https://example.com'}]},
+  sql_injection_test: {title:'SQLi Tester',       desc:'Test URL parameters for SQL injection', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL with param',ph:'http://site.com/page?id=1'}]},
+  xss_scanner:        {title:'XSS Scanner',       desc:'Test for reflected XSS vulnerabilities', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'http://site.com/search?q='}]},
+  ssl_checker:        {title:'SSL Checker',       desc:'Inspect SSL/TLS certificate details', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'host',label:'Host',ph:'example.com'},{id:'port',label:'Port',ph:'443'}]},
+  url_encoder:        {title:'URL Encoder',       desc:'Encode text to URL-safe format', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'text',label:'Text to Encode',ph:'hello world & more=stuff'}]},
+  url_decoder:        {title:'URL Decoder',       desc:'Decode URL-encoded text', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'text',label:'URL Encoded Text',ph:'hello%20world%20%26%20more%3Dstuff'}]},
+  http_method_test:   {title:'HTTP Methods',      desc:'Test which HTTP methods are allowed', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  cookie_analyzer:    {title:'Cookie Analyzer',   desc:'Analyze cookie security flags', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  web_crawler:        {title:'Web Crawler',       desc:'Crawl and discover links on a website', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'},{id:'depth',label:'Depth (1-2)',ph:'1'}]},
+  cms_detector:       {title:'CMS Detector',      desc:'Identify content management system', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  email_harvester:    {title:'Email Harvester',   desc:'Extract email addresses from a webpage', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com/contact'}]},
+  wayback_lookup:     {title:'Wayback Lookup',    desc:'Check Wayback Machine for archived pages', cat:'WEB', badge:'badge-web',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+
+  md5_hash:           {title:'MD5 Hash',          desc:'Generate MD5 hash of text', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Enter text to hash'}]},
+  sha1_hash:          {title:'SHA-1 Hash',        desc:'Generate SHA-1 hash of text', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Enter text to hash'}]},
+  sha256_hash:        {title:'SHA-256 Hash',      desc:'Generate SHA-256 hash of text', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Enter text to hash'}]},
+  sha512_hash:        {title:'SHA-512 Hash',      desc:'Generate SHA-512 hash of text', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Enter text to hash'}]},
+  base64_encode:      {title:'Base64 Encode',     desc:'Encode text to Base64', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Enter text to encode'}]},
+  base64_decode:      {title:'Base64 Decode',     desc:'Decode Base64 encoded text', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Base64 String',ph:'SGVsbG8gV29ybGQ='}]},
+  caesar_cipher:      {title:'Caesar Cipher',     desc:'Encrypt/decrypt with Caesar shift cipher', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Hello World'},{id:'shift',label:'Shift (1-25)',ph:'13'}]},
+  rot13:              {title:'ROT-13',             desc:'Apply ROT-13 substitution cipher', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Hello World'}]},
+  hex_encode:         {title:'Hex Encode',        desc:'Convert text to hexadecimal', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Hello World'}]},
+  hex_decode:         {title:'Hex Decode',        desc:'Convert hexadecimal to text', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Hex String',ph:'48656c6c6f20576f726c64'}]},
+  jwt_decoder:        {title:'JWT Decoder',       desc:'Decode and inspect JWT tokens', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'token',label:'JWT Token',ph:'eyJhbGci...'}]},
+  password_strength:  {title:'Password Strength', desc:'Analyze password strength', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'password',label:'Password',ph:'Enter password to analyze'}]},
+  password_generator: {title:'Pass Generator',   desc:'Generate a secure random password', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'length',label:'Length',ph:'16'}]},
+  hash_cracker:       {title:'Hash Cracker',      desc:'Crack MD5/SHA1/SHA256/SHA512 hashes', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'hash',label:'Hash',ph:'5f4dcc3b5aa765d61d8327deb882cf99'}]},
+  xor_cipher:         {title:'XOR Cipher',        desc:'Apply XOR encryption with a key', cat:'CRYPTO', badge:'badge-crypto',
+    inputs:[{id:'text',label:'Text',ph:'Hello'},{id:'key',label:'Key',ph:'K'}]},
+
+  system_info:        {title:'System Info',       desc:'Display system and OS information', cat:'SYSTEM', badge:'badge-system', inputs:[]},
+  process_list:       {title:'Process List',      desc:'Show running processes sorted by CPU', cat:'SYSTEM', badge:'badge-system', inputs:[]},
+  disk_usage:         {title:'Disk Usage',        desc:'Show disk space usage (df -h)', cat:'SYSTEM', badge:'badge-system', inputs:[]},
+  network_interfaces: {title:'Network Interfaces',desc:'Show all network interfaces', cat:'SYSTEM', badge:'badge-system', inputs:[]},
+  env_variables:      {title:'Env Variables',     desc:'Display environment variables', cat:'SYSTEM', badge:'badge-system', inputs:[]},
+  file_hash_check:    {title:'File Hash Check',   desc:'Compute MD5/SHA1/SHA256 of a file', cat:'SYSTEM', badge:'badge-system',
+    inputs:[{id:'path',label:'File Path',ph:'/etc/passwd'}]},
+  log_analyzer:       {title:'Log Analyzer',      desc:'Analyze log content for errors & IPs', cat:'SYSTEM', badge:'badge-system',
+    inputs:[{id:'log',label:'Log Content (paste)',ph:'Paste log here...',type:'textarea'}]},
+  firewall_rules:     {title:'Firewall Rules',    desc:'Display iptables/ufw firewall rules', cat:'SYSTEM', badge:'badge-system', inputs:[]},
+
+  google_dork:        {title:'Google Dorker',     desc:'Generate Google dork queries for a domain', cat:'RECON', badge:'badge-recon',
+    inputs:[{id:'domain',label:'Domain',ph:'example.com'}]},
+  social_recon:       {title:'Social Recon',      desc:'Find username across social platforms', cat:'RECON', badge:'badge-recon',
+    inputs:[{id:'username',label:'Username',ph:'johndoe'}]},
+  tech_fingerprint:   {title:'Tech Fingerprint',  desc:'Identify technologies used by a website', cat:'RECON', badge:'badge-recon',
+    inputs:[{id:'url',label:'URL',ph:'https://example.com'}]},
+  domain_age:         {title:'Domain Age',        desc:'Find domain creation and expiry dates', cat:'RECON', badge:'badge-recon',
+    inputs:[{id:'domain',label:'Domain',ph:'example.com'}]},
+  asn_lookup:         {title:'ASN Lookup',        desc:'Find Autonomous System Number for an IP', cat:'RECON', badge:'badge-recon',
+    inputs:[{id:'ip',label:'IP Address',ph:'8.8.8.8'}]},
+};
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let currentTool = null;
+let sidebarOpen = true;
+let isMobile = window.innerWidth <= 768;
+
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  if(isMobile){
+    sb.classList.toggle('mobile-open');
+    sb.classList.remove('collapsed');
+  } else {
+    sidebarOpen = !sidebarOpen;
+    sb.classList.toggle('collapsed', !sidebarOpen);
+  }
+}
+
+window.addEventListener('resize',()=>{
+  isMobile = window.innerWidth <= 768;
+});
+
+// ═══════════════════════════════════════════════════════════
+//  LOAD TOOL
+// ═══════════════════════════════════════════════════════════
+function loadTool(name){
+  const t = TOOLS[name];
+  if(!t) return;
+  currentTool = name;
+
+  // Hide welcome, show form
+  document.getElementById('welcome').style.display = 'none';
+  const form = document.getElementById('tool-form');
+  form.style.display = 'flex';
+
+  // Set header
+  document.getElementById('tool-title').textContent = t.title;
+  document.getElementById('tool-desc').textContent = t.desc;
+  const badge = document.getElementById('tool-badge');
+  badge.textContent = t.cat;
+  badge.className = 'tool-category-badge ' + t.badge;
+  document.getElementById('output-title').textContent = `terminal@cyberkit:~/${name} $`;
+
+  // Build inputs
+  const grid = document.getElementById('tool-inputs');
+  grid.innerHTML = '';
+  t.inputs.forEach(inp => {
+    const grp = document.createElement('div');
+    grp.className = 'input-group';
+    grp.innerHTML = `<label>${inp.label}</label>`;
+    if(inp.type === 'textarea'){
+      grp.innerHTML += `<textarea id="inp-${inp.id}" placeholder="${inp.ph || ''}"></textarea>`;
+    } else {
+      grp.innerHTML += `<input type="text" id="inp-${inp.id}" placeholder="${inp.ph || ''}">`;
+    }
+    grid.appendChild(grp);
+  });
+
+  // Clear output
+  setOutput('');
+  appendOutput(`[*] Tool loaded: ${t.title}\n[*] Configure parameters and click EXECUTE.\n`,'info');
+
+  // Highlight sidebar
+  document.querySelectorAll('.tool-btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('onclick') === `loadTool('${name}')`);
+  });
+
+  // Close mobile sidebar
+  if(isMobile) document.getElementById('sidebar').classList.remove('mobile-open');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RUN TOOL
+// ═══════════════════════════════════════════════════════════
+async function runTool(){
+  if(!currentTool) return;
+  const t = TOOLS[currentTool];
+  const params = {};
+  t.inputs.forEach(inp=>{
+    const el = document.getElementById('inp-'+inp.id);
+    if(el) params[inp.id] = el.value.trim();
+  });
+
+  const btn = document.getElementById('run-btn');
+  const status = document.getElementById('run-status');
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span> RUNNING...';
+  status.innerHTML = '<span style="color:var(--accent4)">⟳ Executing...</span>';
+
+  setOutput('');
+  appendOutput(`[*] Executing: ${t.title}\n[*] ${new Date().toLocaleTimeString()}\n${'─'.repeat(42)}\n`,'info');
+
+  try {
+    const res = await fetch('/api/tool', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({tool: currentTool, params})
+    });
+    const data = await res.json();
+    if(data.success){
+      appendOutput('\n' + data.result,'ok');
+    } else {
+      appendOutput('\n' + data.result,'err');
+    }
+    status.innerHTML = `<span style="color:var(--accent)">✔ Done</span>`;
+  } catch(e){
+    appendOutput(`\n[!] Request failed: ${e.message}`,'err');
+    status.innerHTML = `<span style="color:var(--accent3)">✘ Error</span>`;
+  }
+
+  btn.classList.remove('loading');
+  btn.innerHTML = '▶ EXECUTE';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OUTPUT HELPERS
+// ═══════════════════════════════════════════════════════════
+function setOutput(text,cls){
+  const el = document.getElementById('output');
+  el.innerHTML = '';
+  if(text) appendOutput(text,cls);
+}
+
+function appendOutput(text, cls=''){
+  const el = document.getElementById('output');
+  const span = document.createElement('span');
+  if(cls === 'ok')   span.style.color = 'var(--accent)';
+  if(cls === 'err')  span.style.color = 'var(--accent3)';
+  if(cls === 'info') span.style.color = 'var(--accent2)';
+  if(cls === 'warn') span.style.color = 'var(--accent4)';
+
+  // Color special lines
+  text = text.replace(/(\[!\])/g, '<span style="color:var(--accent3)">$1</span>');
+  text = text.replace(/(\[\+\])/g, '<span style="color:var(--accent)">$1</span>');
+  text = text.replace(/(\[\*\])/g, '<span style="color:var(--accent2)">$1</span>');
+  text = text.replace(/(\[✔\])/g, '<span style="color:var(--accent)">$1</span>');
+  text = text.replace(/(\[✘\])/g, '<span style="color:var(--accent3)">$1</span>');
+  text = text.replace(/(OPEN\s+✔)/g, '<span style="color:var(--accent)">$1</span>');
+  text = text.replace(/(CRACKED!)/g, '<span style="color:var(--accent4)">$1</span>');
+
+  span.innerHTML = text;
+  el.appendChild(span);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearOutput(){
+  setOutput('');
+  appendOutput('[*] Output cleared.\n','info');
+}
+
+function copyOutput(){
+  const text = document.getElementById('output').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.querySelector('.copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✔ COPIED';
+    btn.style.color = 'var(--accent)';
+    setTimeout(()=>{btn.textContent=orig;btn.style.color='';},1500);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════════════════
+function updateClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════════════════════
+//  SERVER STATUS
+// ═══════════════════════════════════════════════════════════
+async function updateStatus(){
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    document.getElementById('public-ip-footer').textContent = d.ip;
+    document.getElementById('server-info').textContent = `${d.hostname} | ${d.ip}`;
+  } catch(e) {}
+}
+updateStatus();
+setInterval(updateStatus, 10000);
+
+// ═══════════════════════════════════════════════════════════
+//  MATRIX RAIN
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const canvas = document.getElementById('matrix-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, cols, drops;
+  const CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cols = Math.floor(W / 16);
+    drops = Array(cols).fill(1);
+  }
+
+  function draw(){
+    ctx.fillStyle = 'rgba(3,10,15,0.05)';
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '13px Share Tech Mono';
+    drops.forEach((y,i)=>{
+      const c = CHARS[Math.floor(Math.random()*CHARS.length)];
+      ctx.fillText(c, i*16, y*16);
+      if(y*16 > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  setInterval(draw, 50);
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+    runTool();
+  }
+  if(e.key === 'Escape'){
+    document.getElementById('sidebar').classList.remove('mobile-open');
+  }
+});
+</script>
+</body>
+</html>
